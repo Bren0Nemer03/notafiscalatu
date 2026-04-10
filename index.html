@@ -1,0 +1,432 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthOne - Pedido de Medicamentos</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  :root {
+    --primary-green: #2d6a4f;
+    --secondary-green: #40916c;
+    --light-green: #d8f3dc;
+    --accent-green: #1b4332;
+    --bg-gray: #f8f9fa;
+    --text-dark: #212529;
+    --border-color: #ced4da;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gray);
+    color: var(--text-dark);
+    padding: 20px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 20px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border-top: 8px solid var(--primary-green);
+    overflow-x: hidden; /* Garante que nada saia do container principal */
+  }
+
+  /* HEADER COM LOGO */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .header img {
+    width: 700px;
+    height: 120px;
+    object-fit: contain;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    color: var(--primary-green);
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .doc-info {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .form-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .field label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    color: var(--secondary-green);
+    text-transform: uppercase;
+  }
+
+  input, textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+    width: 100%; /* Garante que inputs ocupem o espaço disponível */
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--secondary-green);
+    box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.1);
+  }
+
+  /* AJUSTE DA TABELA PARA NÃO TRANSBORDAR */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Permite scroll horizontal se a tela for muito pequena */
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 800px; /* Garante uma largura mínima para os dados não ficarem espremidos */
+  }
+
+  th, td {
+    padding: 10px 5px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background: var(--primary-green);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* Ajuste dos inputs dentro da tabela */
+  td input {
+    padding: 6px 4px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: center;
+  }
+
+  td input:hover, td input:focus {
+    border-color: var(--border-color);
+    background: #fff;
+  }
+
+  tr:nth-child(even) {
+    background: #fcfdfc;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .add {
+    background: var(--secondary-green);
+    margin-top: 15px;
+  }
+  .add:hover { background: var(--primary-green); }
+
+  .pdf { background: var(--accent-green); }
+  .print { background: #6c757d; }
+
+  .botoes {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+
+  .total-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--light-green);
+    border-radius: 8px;
+  }
+
+  .total {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-green);
+  }
+
+  .assinaturas {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 50px;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .assinatura-box {
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .linha {
+    border-top: 2px solid var(--border-color);
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .assinatura-box p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .obs-section {
+    margin-top: 30px;
+  }
+
+  .obs-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--primary-green);
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .container { box-shadow: none; border: none; padding: 0; width: 100%; max-width: 100%; }
+    .botoes, .add { display: none; }
+    .table-responsive { overflow: visible; border: none; }
+    table { min-width: 100%; font-size: 10pt; }
+    th { background: #eee !important; color: black !important; border: 1px solid #ccc; }
+    td { border: 1px solid #ccc; }
+    input { border: none !important; padding: 0 !important; background: transparent !important; }
+    .total-container { background: #eee !important; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container" id="documento">
+
+  <!-- HEADER COM LOGO -->
+  <div class="header">
+    <div class="brand">
+  
+      <img src="img/logo2.png" alt="">
+    </div>
+    <div class="doc-info">
+      <strong>PEDIDO DE MEDICAMENTOS</strong><br>
+      Controle Interno de Estoque
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="field">
+      <label>Data do Pedido</label>
+      <input type="date">
+    </div>
+    <div class="field">
+      <label>Solicitante</label>
+      <input type="text" id="solicitante" placeholder="Nome do solicitante">
+    </div>
+    <div class="field">
+      <label>Aprovador</label>
+      <input type="text" id="aprovador" placeholder="Nome do aprovador">
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">Medicamento</th>
+          <th style="width: 10%;">Código</th>
+          <th style="width: 15%;">Categoria</th>
+          <th style="width: 8%;">Qtd</th>
+          <th style="width: 8%;">Un</th>
+          <th style="width: 12%;">Valor</th>
+          <th style="width: 10%;">Desc</th>
+          <th style="width: 12%;">Total</th>
+        </tr>
+      </thead>
+
+      <tbody id="corpoTabela">
+        <tr>
+          <td><input type="text" placeholder="Ex: Paracetamol"></td>
+          <td><input type="text" placeholder="000"></td>
+          <td><input type="text" placeholder="Geral"></td>
+          <td><input type="number" value="1" oninput="calcular()"></td>
+          <td><input type="text" value="UN"></td>
+          <td><input type="number" value="0" step="0.01" oninput="calcular()"></td>
+          <td><input type="number" value="0" step="0.01" oninput="calcular()"></td>
+          <td class="totalItem">0.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="btn add" onclick="adicionarItem()">+ Adicionar Item</button>
+
+  <div class="total-container">
+    <div class="total">
+      Total Geral: R$ <span id="totalGeral">0.00</span>
+    </div>
+  </div>
+
+  <div class="assinaturas">
+    <div class="assinatura-box">
+      <div class="linha"></div>
+      <p id="nomeSolicitante">Solicitante</p>
+    </div>
+
+    <div class="assinatura-box">
+      <div class="linha"></div>
+      <p id="nomeAprovador">Aprovador</p>
+    </div>
+  </div>
+
+  <div class="obs-section">
+    <label>Observações Adicionais:</label>
+    <textarea rows="3" placeholder="Digite aqui observações relevantes sobre o pedido..."></textarea>
+  </div>
+
+</div>
+
+<div class="botoes">
+  <button class="btn pdf" onclick="gerarPDF()">Baixar PDF</button>
+  <button class="btn print" onclick="imprimir()">Imprimir Pedido</button>
+</div>
+
+<script>
+function adicionarItem() {
+  let tabela = document.getElementById("corpoTabela");
+
+  let linha = document.createElement("tr");
+
+  linha.innerHTML = `
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+    <td><input type="number" value="1" oninput="calcular()"></td>
+    <td><input type="text" value="UN"></td>
+    <td><input type="number" value="0" step="0.01" oninput="calcular()"></td>
+    <td><input type="number" value="0" step="0.01" oninput="calcular()"></td>
+    <td class="totalItem">0.00</td>
+  `;
+
+  tabela.appendChild(linha);
+}
+
+function calcular() {
+  let totalGeral = 0;
+  let linhas = document.querySelectorAll("#corpoTabela tr");
+
+  linhas.forEach(linha => {
+    let qtd = linha.children[3].children[0].value || 0;
+    let valor = linha.children[5].children[0].value || 0;
+    let desconto = linha.children[6].children[0].value || 0;
+
+    let total = (qtd * valor) - desconto;
+
+    linha.children[7].innerText = total.toFixed(2);
+    totalGeral += total;
+  });
+
+  document.getElementById("totalGeral").innerText = totalGeral.toFixed(2);
+}
+
+document.getElementById("solicitante").oninput = function() {
+  document.getElementById("nomeSolicitante").innerText = this.value || "Solicitante";
+};
+
+document.getElementById("aprovador").oninput = function() {
+  document.getElementById("nomeAprovador").innerText = this.value || "Aprovador";
+};
+
+function gerarPDF() {
+  const elemento = document.getElementById("documento");
+  const opt = {
+    margin: 10,
+    filename: 'pedido_healthone.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(elemento).save();
+}
+
+function imprimir() {
+  window.print();
+}
+</script>
+
+</body>
+</html>
